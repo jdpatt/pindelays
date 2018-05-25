@@ -1,10 +1,12 @@
 ''' Take an excel file in and produce a pin delay file for a device '''
-from argparse import ArgumentParser
+from argparse import ArgumentParser, RawDescriptionHelpFormatter
+from pathlib import Path
+from typing import Union, Dict, Any
 from openpyxl import load_workbook
 from openpyxl.utils import column_index_from_string
 
 
-def getColIndexOfHeader(name, columns):
+def get_col_index(name: str, columns: list) -> Union[None, int]:
     ''' If the cell exists return the position otherwise return None '''
     for col in columns:
         if col[0].value == name:  # Only look at the first row
@@ -12,14 +14,15 @@ def getColIndexOfHeader(name, columns):
     return None
 
 
-def parseExcelFile(excel_file):
+def parse_excel_file(excel_file: Path) -> Dict[str, Any]:
     '''  Read in excel and get the pin number, function, and color '''
     workbook = load_workbook(excel_file, data_only=True)
     sheet = workbook.active
     delay_dict = dict()
+    columns = list(sheet.iter_cols(max_row=1))
     try:
-        pin_col = getColIndexOfHeader('Pin Name', sheet.iter_cols(max_row=1))
-        delay_col = getColIndexOfHeader('Delay', sheet.iter_cols(max_row=1))
+        pin_col = get_col_index('Pin Name', columns)
+        delay_col = get_col_index('Delay', columns)
         for excel_row in range(2, sheet.max_row + 1):
             pin = sheet.cell(row=excel_row, column=pin_col).value
             delay = sheet.cell(row=excel_row, column=delay_col).value
@@ -33,7 +36,7 @@ def parseExcelFile(excel_file):
     return delay_dict
 
 
-def generateMentorDelay(partnumber, delays):
+def generate_mentor(partnumber: str, delays: Dict) -> None:
     ''' Ouput for Mentor Graphics should be in the following format:
         UNITS <value> th
         PART_NUMBER <part_number>
@@ -46,7 +49,7 @@ def generateMentorDelay(partnumber, delays):
             output.write(f'{key} {value}\n')
 
 
-def generateCadenceDelay(ref, package, unit, delays):
+def generate_cadence(ref: str, package: str, unit: str, delays: Dict) -> None:
     ''' [PIN DELAY]
         [RefDes    <refdes>]in
         [DEVICE    <package name>]
@@ -62,9 +65,10 @@ def generateCadenceDelay(ref, package, unit, delays):
             output.write(f'{key}\t{value}\t{unit}\n')
 
 
-def parseCommandLine():
+def parse_cmd_line():
     ''' handle all the command line inputs. '''
-    parser = ArgumentParser()
+    parser = ArgumentParser(formatter_class=RawDescriptionHelpFormatter,
+                            description=__doc__)
     parser.add_argument('excel_file',
                         nargs='+',
                         help='The excel file to read in')
@@ -92,10 +96,10 @@ def parseCommandLine():
 
 
 if __name__ == '__main__':
-    ARGS = parseCommandLine()
+    ARGS = parse_cmd_line()
     for file_to_parse in ARGS.excel_file:
-        part_delays = parseExcelFile(file_to_parse)
+        part_delays = parse_excel_file(file_to_parse)
         if ARGS.cadence:
-            generateCadenceDelay(ARGS.refdes, ARGS.package, ARGS.units, part_delays)
+            generate_cadence(ARGS.refdes, ARGS.package, ARGS.units, part_delays)
         if ARGS.mentor:
-            generateMentorDelay(ARGS.partnumber, part_delays)
+            generate_mentor(ARGS.partnumber, part_delays)
