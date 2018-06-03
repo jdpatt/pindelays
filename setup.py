@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 def readme():
@@ -7,11 +7,15 @@ def readme():
 
 
 setup(name='pindelays',
-      version='0.1.1',
+      version='0.2.0',
       description='Excel to a Pin Delay File for either Cadence or Mentor',
+      long_description=readme(),
       url='https://bitbucket.org/jdpatt/pindelays/',
       author='David Patterson',
-      packages=['pindelays'],
+      packages=find_packages(exclude=['tests*']),
+      install_requires=['openpyxl'],
       entry_points={"console_scripts": ['pindelays = pindelays.pindelays:main']},
+      setup_requires=['pytest-runner'],
+      tests_require=['pytest'],
       include_package_data=True,
       zip_safe=False)

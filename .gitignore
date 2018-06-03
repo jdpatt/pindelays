@@ -1,6 +1,8 @@
 __pycache__/
-*.log
 *.pyc
 /dist/
 /*.egg-info
 .*
+htmlcov/
+PinPkgLengths.txt
+test_package.csv
