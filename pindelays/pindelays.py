@@ -40,8 +40,8 @@ def parse_excel_file(workbook: Workbook) -> Dict[str, Any]:
     delay_dict = dict()
     columns = list(sheet.iter_cols(max_row=1))
     try:
-        pin_col = get_column('Pin Name', columns)
-        delay_col = get_column('Delay', columns)
+        pin_col = get_column("Pin Name", columns)
+        delay_col = get_column("Delay", columns)
         for excel_row in range(2, sheet.max_row + 1):
             pin = str(sheet.cell(row=excel_row, column=pin_col).value)
             delay = str(sheet.cell(row=excel_row, column=delay_col).value)
@@ -68,11 +68,11 @@ def generate_mentor(partnumber: str, delays: Dict) -> None:
         delays: The data read in from the excel file
 
     """
-    with open('PinPkgLengths.txt', 'w') as output:
-        output.write('UNITS th\n')
-        output.write(f'PART_NUMBER {partnumber}\n')
+    with open("PinPkgLengths.txt", "w") as output:
+        output.write("UNITS th\n")
+        output.write(f"PART_NUMBER {partnumber}\n")
         for key, value in delays.items():
-            output.write(f'{key} {value}\n')
+            output.write(f"{key} {value}\n")
 
 
 def generate_cadence(ref: str, package: str, unit: str, delays: Dict) -> None:
@@ -95,42 +95,56 @@ def generate_cadence(ref: str, package: str, unit: str, delays: Dict) -> None:
         delays: The data read in from the excel file
 
     """
-    with open(f'{package}.csv', 'w') as output:
-        output.write('PIN DELAY\n')
-        output.write(f'REFDES\t{ref}\n')
-        output.write(f'DEVICE\t{package}\n')
-        output.write('\n')
+    with open(f"{package}.csv", "w") as output:
+        output.write("PIN DELAY\n")
+        output.write(f"REFDES\t{ref}\n")
+        output.write(f"DEVICE\t{package}\n")
+        output.write("\n")
         for key, value in delays.items():
-            output.write(f'{key}\t{value}\t{unit}\n')
+            output.write(f"{key}\t{value}\t{unit}\n")
 
 
 def parse_cmd_line():
     """handle all the command line inputs. """
-    parser = ArgumentParser(formatter_class=RawDescriptionHelpFormatter,
-                            description=__doc__)
-    parser.add_argument('excel_file',
-                        nargs='+',
-                        help='The excel file to read in')
-    parser.add_argument('--cadence', '-c',
-                        action='store_true',
-                        default=True,
-                        help='Generate Cadence File')
-    parser.add_argument('--mentor', '-m',
-                        action='store_true',
-                        default=False,
-                        help='Generate Mentor File')
-    parser.add_argument('--partnumber', '-p',
-                        default='dummy_part',
-                        help='Part number [Only used in mentor]')
-    parser.add_argument('--package', '-d',
-                        default='dummy_package',
-                        help='Device Package [Only used in cadence]')
-    parser.add_argument('--refdes', '-r',
-                        default='U1',
-                        help='RefDes [Only used in cadence]')
-    parser.add_argument('--units', '-u',
-                        default='NS',
-                        help='RefDes [Only used in cadence] Mentor needs mils')
+    parser = ArgumentParser(
+        formatter_class=RawDescriptionHelpFormatter, description=__doc__
+    )
+    parser.add_argument("excel_file", nargs="+", help="The excel file to read in")
+    parser.add_argument(
+        "--cadence",
+        "-c",
+        action="store_true",
+        default=True,
+        help="Generate Cadence File",
+    )
+    parser.add_argument(
+        "--mentor",
+        "-m",
+        action="store_true",
+        default=False,
+        help="Generate Mentor File",
+    )
+    parser.add_argument(
+        "--partnumber",
+        "-p",
+        default="dummy_part",
+        help="Part number [Only used in mentor]",
+    )
+    parser.add_argument(
+        "--package",
+        "-d",
+        default="dummy_package",
+        help="Device Package [Only used in cadence]",
+    )
+    parser.add_argument(
+        "--refdes", "-r", default="U1", help="RefDes [Only used in cadence]"
+    )
+    parser.add_argument(
+        "--units",
+        "-u",
+        default="NS",
+        help="RefDes [Only used in cadence] Mentor needs mils",
+    )
     return parser.parse_args()
 
 
@@ -138,15 +152,15 @@ def main():
     """Main Application Entry """
     args = parse_cmd_line()
     for file_to_parse in args.excel_file:
-        print(f'Reading in Excel File: {Path(file_to_parse)}')
+        print(f"Reading in Excel File: {Path(file_to_parse)}")
         part_delays = parse_excel_file(load_workbook(file_to_parse, data_only=True))
         if args.cadence:
             generate_cadence(args.refdes, args.package, args.units, part_delays)
-            print(f'Cadence File Generated')
+            print(f"Cadence File Generated")
         if args.mentor:
             generate_mentor(args.partnumber, part_delays)
-            print(f'Mentor File Generated')
+            print(f"Mentor File Generated")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
