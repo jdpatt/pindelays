@@ -156,10 +156,10 @@ def main():
         part_delays = parse_excel_file(load_workbook(file_to_parse, data_only=True))
         if args.cadence:
             generate_cadence(args.refdes, args.package, args.units, part_delays)
-            print(f"Cadence File Generated")
+            print("Cadence File Generated")
         if args.mentor:
             generate_mentor(args.partnumber, part_delays)
-            print(f"Mentor File Generated")
+            print("Mentor File Generated")
 
 
 if __name__ == "__main__":
