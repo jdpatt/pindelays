@@ -6,10 +6,9 @@ from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from pathlib import Path
 from typing import Dict, Any
 from openpyxl import load_workbook, Workbook
-from openpyxl.utils import column_index_from_string
 
 
-def get_column(name: str, columns: list) -> int:
+def get_column(name: str, worksheet) -> int:
     """Search a row of cells for the string.
 
     Args:
@@ -20,9 +19,10 @@ def get_column(name: str, columns: list) -> int:
         Either returns the column number or returns 0 if no column matched the name
 
     """
-    for col in columns:
-        if col[0].value == name:  # Only look at the first row
-            return int(column_index_from_string(col[0].column))
+    for rows in worksheet.iter_rows(min_row=1, max_row=1, min_col=1):
+        for column in rows:
+            if column.value == name:
+                return column.col_idx
     return 0
 
 
@@ -38,17 +38,15 @@ def parse_excel_file(workbook: Workbook) -> Dict[str, Any]:
     """
     sheet = workbook.active
     delay_dict = dict()
-    columns = list(sheet.iter_cols(max_row=1))
     try:
-        pin_col = get_column("Pin Name", columns)
-        delay_col = get_column("Delay", columns)
+        pin_col = get_column("Pin Name", sheet)
+        delay_col = get_column("Delay", sheet)
         for excel_row in range(2, sheet.max_row + 1):
             pin = str(sheet.cell(row=excel_row, column=pin_col).value)
             delay = str(sheet.cell(row=excel_row, column=delay_col).value)
             if not all([pin, delay]):
                 raise ValueError
-            else:
-                delay_dict.update({pin: delay})
+            delay_dict.update({pin: delay})
     except (ValueError, KeyError, UnboundLocalError) as error:
         print(error)
         raise

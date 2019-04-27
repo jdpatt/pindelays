@@ -28,8 +28,8 @@ class TestPinDelays(object):
     def test_get_column(self, workbook):
         """ If the cell exists return the position otherwise return None """
         worksheet = workbook.active
-        assert get_column("Delay", worksheet.iter_cols(max_row=1)) == 2
-        assert get_column("foo", worksheet.iter_cols(max_row=1)) == 0
+        assert get_column("Delay", worksheet) == 2
+        assert get_column("foo", worksheet) == 0
 
     def test_parse_excel_file(self, workbook):
         assert parse_excel_file(workbook) == {"A1": "10", "A2": "12"}
