@@ -51,10 +51,18 @@ class TestPinDelays(object):
                 "A2\t12\tMIL\n"
             )
 
-    def test_generate_mentor(self, workbook):
+    def test_generate_mentor_mils(self, workbook):
         delays = {"A1": "10", "A2": "12"}
-        generate_mentor("test_partnumber", delays)
+        generate_mentor("test_partnumber", "mil", delays)
         with open(Path().cwd().joinpath("PinPkgLengths.txt")) as mentor:
             assert mentor.read() == (
                 "UNITS th\n" "PART_NUMBER test_partnumber\n" "A1 10\n" "A2 12\n"
+            )
+
+    def test_generate_mentor_delay(self, workbook):
+        delays = {"A1": "10", "A2": "12"}
+        generate_mentor("test_partnumber", "ps", delays)
+        with open(Path().cwd().joinpath("PinPkgDelays.txt")) as mentor:
+            assert mentor.read() == (
+                "UNITS ps\n" "PART_NUMBER test_partnumber\n" "A1 10\n" "A2 12\n"
             )

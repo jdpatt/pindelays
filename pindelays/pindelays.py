@@ -1,7 +1,6 @@
-"""For high speed PCB designs, one must take into account the internal length of a pin.  Because
-the difference between pins in a diff pair could be so much that the signal would not work well.
-This is also very common for DDR buses. This python program takes an excel file and produces a pin
-delay file that is correctly formatted for your EDA tool set. """
+"""For today's high speed designs, one must take into account the internal length or delay of a pin.
+This python program takes an excel file and produces a pin delay file that is correctly formatted
+for your EDA tool set. """
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from pathlib import Path
 from typing import Dict, Any
@@ -53,7 +52,7 @@ def parse_excel_file(workbook: Workbook) -> Dict[str, Any]:
     return delay_dict
 
 
-def generate_mentor(partnumber: str, delays: Dict) -> None:
+def generate_mentor(partnumber: str, unit: str, delays: Dict) -> None:
     """ This function generates a text file that can be imported in the Constraint Manager tool.
 
     Example:
@@ -66,8 +65,13 @@ def generate_mentor(partnumber: str, delays: Dict) -> None:
         delays: The data read in from the excel file
 
     """
-    with open("PinPkgLengths.txt", "w") as output:
-        output.write("UNITS th\n")
+    if unit == "mil":
+        filename = "PinPkgLengths.txt"
+        unit = "th"
+    else:
+        filename = "PinPkgDelays.txt"
+    with open(filename, "w") as output:
+        output.write(f"UNITS {unit}\n")
         output.write(f"PART_NUMBER {partnumber}\n")
         for key, value in delays.items():
             output.write(f"{key} {value}\n")
@@ -99,7 +103,7 @@ def generate_cadence(ref: str, package: str, unit: str, delays: Dict) -> None:
         output.write(f"DEVICE\t{package}\n")
         output.write("\n")
         for key, value in delays.items():
-            output.write(f"{key}\t{value}\t{unit}\n")
+            output.write(f"{key}\t{value}\t{unit.upper()}\n")
 
 
 def parse_cmd_line():
@@ -140,8 +144,9 @@ def parse_cmd_line():
     parser.add_argument(
         "--units",
         "-u",
-        default="NS",
-        help="RefDes [Only used in cadence] Mentor needs mils",
+        choices=["ns", "ps", "mil"],
+        default="ns",
+        help="Units",
     )
     return parser.parse_args()
 
@@ -156,7 +161,7 @@ def main():
             generate_cadence(args.refdes, args.package, args.units, part_delays)
             print("Cadence File Generated")
         if args.mentor:
-            generate_mentor(args.partnumber, part_delays)
+            generate_mentor(args.partnumber, args.units, part_delays)
             print("Mentor File Generated")
 
 
