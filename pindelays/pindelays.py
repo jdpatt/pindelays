@@ -25,7 +25,7 @@ def get_column(name: str, worksheet) -> int:
     return 0
 
 
-def parse_excel_file(workbook: Workbook) -> Dict[str, Any]:
+def parse_excel_file(workbook: Workbook, pin_col=None, delay_col=None) -> Dict[str, Any]:
     """  Read in excel and get the pin number and internal length
 
     The excel file must have a header row with the cells "Pin Name" and "Delay".  It does not
@@ -38,8 +38,8 @@ def parse_excel_file(workbook: Workbook) -> Dict[str, Any]:
     sheet = workbook.active
     delay_dict = dict()
     try:
-        pin_col = get_column("Pin Name", sheet)
-        delay_col = get_column("Delay", sheet)
+        pin_col = pin_col or get_column("Pin Name", sheet)
+        delay_col = delay_col or get_column("Delay", sheet)
         for excel_row in range(2, sheet.max_row + 1):
             pin = str(sheet.cell(row=excel_row, column=pin_col).value)
             delay = str(sheet.cell(row=excel_row, column=delay_col).value)

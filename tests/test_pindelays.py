@@ -33,6 +33,7 @@ class TestPinDelays(object):
 
     def test_parse_excel_file(self, workbook):
         assert parse_excel_file(workbook) == {"A1": "10", "A2": "12"}
+        assert parse_excel_file(workbook, 1, 2)
 
     def test_parse_excel_file_value_error(self, workbook):
         workbook.active["B2"] = ""  # Missing delay for pin A1
