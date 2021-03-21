@@ -6,33 +6,26 @@ and produces a correctly formatting pin package length file for either Mentor (i
 You need to do any math in excel prior to running the script to convert the Delay column to the right unit.
 
 ## Install
+
 * Clone this repo to your machine
 * Run `pip install .` from that folder
 
 ## Usage
-```
-pindelays --help
-usage: pindelays [-h] [--cadence] [--mentor] [--partnumber PARTNUMBER]
-                 [--package PACKAGE] [--refdes REFDES] [--units UNITS]
-                 excel_file [excel_file ...]
 
-For today's high speed designs, one must take into account the internal length or delay of a pin.
-This python program takes an excel file and produces a pin delay file that is correctly formatted
-for your EDA tool set.
+```shell
+pindelay --help
+Usage: pindelay [OPTIONS] [EXCEL_FILE]... [[cadence|mentor]]
 
-positional arguments:
-  excel_file            The excel file to read in
+  For today's high speed designs, one must take into account the internal
+  length or delay of a pin. This python program takes an excel file and
+  produces a pin delay file that is correctly formatted for your EDA tool
+  set.
 
-optional arguments:
-  -h, --help            show this help message and exit
-  --cadence, -c         Generate Cadence File
-  --mentor, -m          Generate Mentor File
-  --partnumber PARTNUMBER, -p PARTNUMBER
-                        Part number [Only used in mentor]
-  --package PACKAGE, -d PACKAGE
-                        Device Package [Only used in cadence]
-  --refdes REFDES, -r REFDES
-                        RefDes [Only used in cadence]
-  --units UNITS, -u ["ns", "ps", "mil"]
-                        Units
+Options:
+  -p, --partnumber TEXT    Part number [Only used in mentor]
+  -d, --package TEXT       Device Package [Only used in cadence]
+  -r, --refdes TEXT        RefDes [Only used in cadence]
+  -u, --units [ns|ps|mil]  Units
+  --version                Show the version and exit.
+  -h, --help               Show this message and exit.
 ```

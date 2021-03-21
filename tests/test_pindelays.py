@@ -1,12 +1,13 @@
-import pytest
-from openpyxl import Workbook
 from pathlib import Path
 
+import pytest
+from openpyxl import Workbook
+
 from pindelays.pindelays import (
+    generate_cadence,
+    generate_mentor,
     get_column,
     parse_excel_file,
-    generate_mentor,
-    generate_cadence,
 )
 
 

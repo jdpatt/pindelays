@@ -1,10 +1,11 @@
 """For today's high speed designs, one must take into account the internal length or delay of a pin.
 This python program takes an excel file and produces a pin delay file that is correctly formatted
 for your EDA tool set. """
-from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from pathlib import Path
-from typing import Dict, Any
-from openpyxl import load_workbook, Workbook
+from typing import Any, Dict
+
+import click
+from openpyxl import Workbook, load_workbook
 
 
 def get_column(name: str, worksheet) -> int:
@@ -25,8 +26,10 @@ def get_column(name: str, worksheet) -> int:
     return 0
 
 
-def parse_excel_file(workbook: Workbook, pin_col=None, delay_col=None) -> Dict[str, Any]:
-    """  Read in excel and get the pin number and internal length
+def parse_excel_file(
+    workbook: Workbook, pin_col=None, delay_col=None
+) -> Dict[str, Any]:
+    """Read in excel and get the pin number and internal length
 
     The excel file must have a header row with the cells "Pin Name" and "Delay".  It does not
     matter which column they are in.
@@ -53,7 +56,7 @@ def parse_excel_file(workbook: Workbook, pin_col=None, delay_col=None) -> Dict[s
 
 
 def generate_mentor(partnumber: str, unit: str, delays: Dict) -> None:
-    """ This function generates a text file that can be imported in the Constraint Manager tool.
+    """This function generates a text file that can be imported in the Constraint Manager tool.
 
     Example:
         UNITS <value> th
@@ -78,7 +81,7 @@ def generate_mentor(partnumber: str, unit: str, delays: Dict) -> None:
 
 
 def generate_cadence(ref: str, package: str, unit: str, delays: Dict) -> None:
-    """ This function generates a text file that can be imported into Allergo if you are using the
+    """This function generates a text file that can be imported into Allergo if you are using the
     high speed license. Allergo applies delays individual vs against all part numbers that match
     like mentor.  UNITS MIL can be a header row that applies to everything or you can list unit for
     every row.  This does the later.
@@ -106,64 +109,50 @@ def generate_cadence(ref: str, package: str, unit: str, delays: Dict) -> None:
             output.write(f"{key}\t{value}\t{unit.upper()}\n")
 
 
-def parse_cmd_line():
-    """handle all the command line inputs. """
-    parser = ArgumentParser(
-        formatter_class=RawDescriptionHelpFormatter, description=__doc__
-    )
-    parser.add_argument("excel_file", nargs="+", help="The excel file to read in")
-    parser.add_argument(
-        "--cadence",
-        "-c",
-        action="store_true",
-        default=True,
-        help="Generate Cadence File",
-    )
-    parser.add_argument(
-        "--mentor",
-        "-m",
-        action="store_true",
-        default=False,
-        help="Generate Mentor File",
-    )
-    parser.add_argument(
-        "--partnumber",
-        "-p",
-        default="dummy_part",
-        help="Part number [Only used in mentor]",
-    )
-    parser.add_argument(
-        "--package",
-        "-d",
-        default="dummy_package",
-        help="Device Package [Only used in cadence]",
-    )
-    parser.add_argument(
-        "--refdes", "-r", default="U1", help="RefDes [Only used in cadence]"
-    )
-    parser.add_argument(
-        "--units",
-        "-u",
-        choices=["ns", "ps", "mil"],
-        default="ns",
-        help="Units",
-    )
-    return parser.parse_args()
-
-
-def main():
-    """Main Application Entry """
-    args = parse_cmd_line()
-    for file_to_parse in args.excel_file:
+@click.command(context_settings=dict(help_option_names=["-h", "--help"]))
+@click.argument("excel_file", nargs=-1)
+@click.argument(
+    "output_type", type=click.Choice(["cadence", "mentor"]), default="cadence"
+)
+@click.option(
+    "--partnumber",
+    "-p",
+    type=str,
+    default="dummy_part",
+    help="Part number [Only used in mentor]",
+)
+@click.option(
+    "--package",
+    "-d",
+    type=str,
+    default="dummy_package",
+    help="Device Package [Only used in cadence]",
+)
+@click.option(
+    "--refdes", "-r", default="U1", type=str, help="RefDes [Only used in cadence]"
+)
+@click.option(
+    "--units",
+    "-u",
+    type=click.Choice(["ns", "ps", "mil"]),
+    default="ns",
+    help="Units",
+)
+@click.version_option()
+def pindelay(excel_file, output_type, partnumber, package, refdes, units):
+    """For today's high speed designs, one must take into account the internal length or delay of a pin.
+    This python program takes an excel file and produces a pin delay file that is correctly formatted
+    for your EDA tool set."""
+    for file_to_parse in excel_file:
         print(f"Reading in Excel File: {Path(file_to_parse)}")
         part_delays = parse_excel_file(load_workbook(file_to_parse, data_only=True))
-        if args.cadence:
-            generate_cadence(args.refdes, args.package, args.units, part_delays)
+        if output_type == "cadence":
+            generate_cadence(refdes, package, units, part_delays)
             print("Cadence File Generated")
-        if args.mentor:
-            generate_mentor(args.partnumber, args.units, part_delays)
+        if output_type == "mentor":
+            generate_mentor(partnumber, units, part_delays)
             print("Mentor File Generated")
 
 
 if __name__ == "__main__":
-    main()
+    pindelay()
