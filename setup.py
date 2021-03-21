@@ -8,7 +8,7 @@ def readme():
 
 setup(
     name="pindelays",
-    version="1.0.0",
+    version="1.0.1",
     description="Excel to a Pin Delay File for either Cadence or Mentor",
     long_description=readme(),
     url="https://github.com/jdpatt/pindelays",

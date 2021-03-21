@@ -26,9 +26,7 @@ def get_column(name: str, worksheet) -> int:
     return 0
 
 
-def parse_excel_file(
-    workbook: Workbook, pin_col=None, delay_col=None
-) -> Dict[str, Any]:
+def parse_excel_file(workbook: Workbook, pin_col=None, delay_col=None) -> Dict[str, Any]:
     """Read in excel and get the pin number and internal length
 
     The excel file must have a header row with the cells "Pin Name" and "Delay".  It does not
@@ -111,9 +109,7 @@ def generate_cadence(ref: str, package: str, unit: str, delays: Dict) -> None:
 
 @click.command(context_settings=dict(help_option_names=["-h", "--help"]))
 @click.argument("excel_file", nargs=-1)
-@click.argument(
-    "output_type", type=click.Choice(["cadence", "mentor"]), default="cadence"
-)
+@click.argument("output_type", type=click.Choice(["cadence", "mentor"]), default="cadence")
 @click.option(
     "--partnumber",
     "-p",
@@ -128,9 +124,7 @@ def generate_cadence(ref: str, package: str, unit: str, delays: Dict) -> None:
     default="dummy_package",
     help="Device Package [Only used in cadence]",
 )
-@click.option(
-    "--refdes", "-r", default="U1", type=str, help="RefDes [Only used in cadence]"
-)
+@click.option("--refdes", "-r", default="U1", type=str, help="RefDes [Only used in cadence]")
 @click.option(
     "--units",
     "-u",
