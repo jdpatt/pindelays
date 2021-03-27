@@ -3,7 +3,12 @@ from pathlib import Path
 import pytest
 from openpyxl import Workbook
 
-from pindelays.pindelays import generate_cadence, generate_mentor, get_column, parse_excel_file
+from pindelays.pindelays import (
+    generate_cadence,
+    generate_mentor,
+    get_column,
+    parse_excel_file,
+)
 
 
 @pytest.fixture(scope="session")
